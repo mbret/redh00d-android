@@ -74,11 +74,25 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
             }
         });
 
+        /*
+         * Sign in
+         */
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 attemptLogin();
+            }
+        });
+
+        /*
+         * Register
+         */
+        Button registerButton = (Button) findViewById(R.id.register_button);
+        registerButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // @todo
             }
         });
 
@@ -89,7 +103,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
     private void populateAutoComplete() {
         getLoaderManager().initLoader(0, null, this);
     }
-
 
     /**
      * Attempts to sign in or register the account specified by the login form.
@@ -143,6 +156,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor>{
             mAuthTask.execute((Void) null);
         }
     }
+
     private boolean isEmailValid(String email) {
         //TODO: Replace this with your own logic
         return email.contains("@");
