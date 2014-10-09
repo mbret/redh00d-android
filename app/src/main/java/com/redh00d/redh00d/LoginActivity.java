@@ -5,14 +5,12 @@ import android.content.Intent;
 import android.os.AsyncTask;
 
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,8 +18,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.redh00d.redh00d.Forms.LoginForm;
-
-import java.util.List;
 
 
 /**
@@ -48,7 +44,6 @@ public class LoginActivity extends Activity {
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email_text);
-//        populateAutoComplete();
 
         mPasswordView = (EditText) findViewById(R.id.password_text);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -97,6 +92,8 @@ public class LoginActivity extends Activity {
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        mEmailView.requestFocus(); // @todo in xml
     }
 
     /**
@@ -105,6 +102,7 @@ public class LoginActivity extends Activity {
      * errors are presented and no actual login attempt is made.
      */
     public void attemptLogin() {
+        Log.i("qsd","qsdqsd");
         if (mAuthTask != null) {
             return;
         }
