@@ -17,7 +17,17 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.loopj.android.http.*;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 import com.redh00d.redh00d.Forms.LoginForm;
+import com.redh00d.redh00d.Utils.RestClient;
+
+import org.apache.http.Header;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Objects;
 
 
 /**
@@ -97,13 +107,15 @@ public class LoginActivity extends Activity {
     }
 
     /**
+     * Method get triggered when login button is clicked
+     *
      * Attempts to sign in or register the account specified by the login form.
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
     public void attemptLogin() {
         Log.i("qsd","qsdqsd");
-        if (mAuthTask != null) {
+        if ( mAuthTask != null ) {
             return;
         }
 
@@ -158,6 +170,10 @@ public class LoginActivity extends Activity {
         mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
     }
 
+    private void doAuthWithWS( String email, String password ){
+
+    }
+
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
@@ -166,6 +182,7 @@ public class LoginActivity extends Activity {
 
         private final String mEmail;
         private final String mPassword;
+        private int statusCode;
 
         public UserLoginTask(String email, String password) {
             mEmail = email;
@@ -179,19 +196,48 @@ public class LoginActivity extends Activity {
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
 
-            boolean accountFound = false;
+            final HashMap<String, Object> result = new HashMap();
 
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
+            Log.i("doAuthWithWS", "Start auth with web service");
+            RequestParams rParams = new RequestParams();
+            rParams.put("username", mEmail);
+            rParams.put("password", mPassword);
+
+            // Make RESTful webservice call using AsyncHttpClient object
+            RestClient.get("/auth", rParams, new AsyncHttpResponseHandler() {
+
+                // When the response returned by REST has Http response code '200'
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, byte[] response) {
+
+                    result.put("success", true);
+                    result.put("status", statusCode);
+
+                }
+
+                // When the response returned by REST has Http response code other than '200'
+                @Override
+                public void onFailure(int statusCode, Header[] headers, byte[] errorResponse, Throwable e) {
+
+                    result.put("success", false);
+                    result.put("status", statusCode);
+
+                }
+
+            }, true);
+
+            statusCode = (Integer)result.get("status");
+//            try {
+//                // Simulate network access.
+//                Thread.sleep(2000);
+//            } catch (InterruptedException e) {
+//                return false;
+//            }
 
             // Check account
 
             // TODO: register the new account here.
-            return accountFound;
+            return (Boolean)result.get("success");
         }
 
         /**
@@ -202,12 +248,33 @@ public class LoginActivity extends Activity {
             mAuthTask = null;
             showProgress(false);
 
-            if (success) {
-                Toast.makeText(getApplicationContext(), "Login success", Toast.LENGTH_SHORT).show();
-//                finish(); // close activity
-            } else {
-                Toast.makeText(getApplicationContext(), "Incorrect email or password", Toast.LENGTH_SHORT).show();
+            if(success){
+                if (statusCode == 200) {
+                    Toast.makeText(getApplicationContext(), "You are successfully logged in!", Toast.LENGTH_LONG).show();
+                }
+                else if (statusCode == 401) {
+                    Toast.makeText(getApplicationContext(), "Bad credentials", Toast.LENGTH_LONG).show();
+                }
+                // When Http response code is '404'
+                else if (statusCode == 404) {
+                    Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
+                }
+                // When Http response code is '500'
+                else if (statusCode == 500) {
+                    Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
+                }
+                // When Http response code other than 404, 500
+                else {
+                    Toast.makeText(getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet or remote server is not up and running]", Toast.LENGTH_LONG).show();
+                }
             }
+
+//            if (success) {
+//                Toast.makeText(getApplicationContext(), "Login success", Toast.LENGTH_SHORT).show();
+////                finish(); // close activity
+//            } else {
+//                Toast.makeText(getApplicationContext(), "Incorrect email or password", Toast.LENGTH_SHORT).show();
+//            }
         }
 
 

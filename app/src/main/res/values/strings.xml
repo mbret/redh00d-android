@@ -6,16 +6,12 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_register">RegisterActivity</string>
     <string name="hello_world">Hello world!</string>
-
     <string name="button_register">Register</string>
     <string name="button_login">Sign in</string>
-
     <string name="field_email">Email</string>
     <string name="field_password">Password</string>
-
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
-
 
     <!-- Strings related to login -->
     <string name="title_activity_login">LoginActivity</string>
@@ -29,5 +25,6 @@
 
     <!-- Strings related to subscribe -->
 
+    <string name="title_activity_home">HomeActivity</string>
 
 </resources>
