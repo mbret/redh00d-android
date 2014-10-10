@@ -114,7 +114,6 @@ public class LoginActivity extends Activity {
      * errors are presented and no actual login attempt is made.
      */
     public void attemptLogin() {
-        Log.i("qsd","qsdqsd");
         if ( mAuthTask != null ) {
             return;
         }
@@ -158,6 +157,7 @@ public class LoginActivity extends Activity {
             mAuthTask = new UserLoginTask(email, password);
             // Start the login task asynchronous
             mAuthTask.execute((Void) null);
+            Log.i("ds","sqdsqd");
         }
     }
 
@@ -170,10 +170,11 @@ public class LoginActivity extends Activity {
         mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
     }
 
-    private void doAuthWithWS( String email, String password ){
-
-    }
-
+    // Uses AsyncTask to create a task away from the main UI thread. This task takes a
+    // URL string and uses it to create an HttpUrlConnection. Once the connection
+    // has been established, the AsyncTask downloads the contents of the webpage as
+    // an InputStream. Finally, the InputStream is converted into a string, which is
+    // displayed in the UI by the AsyncTask's onPostExecute method.
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
@@ -196,45 +197,15 @@ public class LoginActivity extends Activity {
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
 
-            final HashMap<String, Object> result = new HashMap();
-
             Log.i("doAuthWithWS", "Start auth with web service");
             RequestParams rParams = new RequestParams();
             rParams.put("username", mEmail);
             rParams.put("password", mPassword);
 
-            // Make RESTful webservice call using AsyncHttpClient object
-            RestClient.get("/auth", rParams, new AsyncHttpResponseHandler() {
-
-                // When the response returned by REST has Http response code '200'
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, byte[] response) {
-
-                    result.put("success", true);
-                    result.put("status", statusCode);
-
-                }
-
-                // When the response returned by REST has Http response code other than '200'
-                @Override
-                public void onFailure(int statusCode, Header[] headers, byte[] errorResponse, Throwable e) {
-
-                    result.put("success", false);
-                    result.put("status", statusCode);
-
-                }
-
-            }, true);
+            HashMap<String, Object> result;
+            result = this.performAuth( rParams );
 
             statusCode = (Integer)result.get("status");
-//            try {
-//                // Simulate network access.
-//                Thread.sleep(2000);
-//            } catch (InterruptedException e) {
-//                return false;
-//            }
-
-            // Check account
 
             // TODO: register the new account here.
             return (Boolean)result.get("success");
@@ -252,7 +223,9 @@ public class LoginActivity extends Activity {
                 if (statusCode == 200) {
                     Toast.makeText(getApplicationContext(), "You are successfully logged in!", Toast.LENGTH_LONG).show();
                 }
-                else if (statusCode == 401) {
+            }
+            else {
+                if (statusCode == 401) {
                     Toast.makeText(getApplicationContext(), "Bad credentials", Toast.LENGTH_LONG).show();
                 }
                 // When Http response code is '404'
@@ -268,20 +241,36 @@ public class LoginActivity extends Activity {
                     Toast.makeText(getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet or remote server is not up and running]", Toast.LENGTH_LONG).show();
                 }
             }
-
-//            if (success) {
-//                Toast.makeText(getApplicationContext(), "Login success", Toast.LENGTH_SHORT).show();
-////                finish(); // close activity
-//            } else {
-//                Toast.makeText(getApplicationContext(), "Incorrect email or password", Toast.LENGTH_SHORT).show();
-//            }
         }
-
 
         @Override
         protected void onCancelled() {
             mAuthTask = null;
             showProgress(false);
+        }
+
+        private HashMap<String, Object> performAuth( RequestParams params ){
+
+            final HashMap<String, Object> result = new HashMap();
+            // Make RESTful webservice call using AsyncHttpClient object
+            RestClient.get("/auth", params, new AsyncHttpResponseHandler() {
+
+                // When the response returned by REST has Http response code '200'
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, byte[] response) {
+                    result.put("success", true);
+                    result.put("status", statusCode);
+                }
+
+                // When the response returned by REST has Http response code other than '200'
+                @Override
+                public void onFailure(int statusCode, Header[] headers, byte[] errorResponse, Throwable e) {
+                    result.put("success", false);
+                    result.put("status", statusCode);
+                }
+
+            }, true);
+            return result;
         }
     }
 }
